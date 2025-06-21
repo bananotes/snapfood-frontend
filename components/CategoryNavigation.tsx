@@ -11,7 +11,7 @@ interface CategoryNavigationProps {
 
 export default function CategoryNavigation({ categories }: CategoryNavigationProps) {
   const { activeCategory, setActiveCategory } = useAppContext()
-  const [activeSection, setActiveSection] = useState("Recommended")
+  const [activeSection, setActiveSection] = useState("推荐")
   const [underlineStyle, setUnderlineStyle] = useState({ width: 0, left: 0 })
   const navRef = useRef<HTMLDivElement>(null)
   const buttonRefs = useRef<(HTMLButtonElement | null)[]>([])
@@ -19,8 +19,15 @@ export default function CategoryNavigation({ categories }: CategoryNavigationPro
 
   const UNDERLINE_EXTRA_PADDING = 12 // 6px on each side
 
+  // Don't render if categories is empty
+  if (!categories || categories.length === 0) {
+    return null
+  }
+
   useEffect(() => {
     const handleScroll = () => {
+      if (!categories || categories.length === 0) return
+      
       const sections = categories.map((cat) => document.getElementById(`section-${cat.id}`))
       const scrollPosition = window.scrollY + (navRef.current?.offsetHeight || 60) + 72 + 50 // Header + Nav + Offset
 
@@ -41,6 +48,8 @@ export default function CategoryNavigation({ categories }: CategoryNavigationPro
 
   useEffect(() => {
     const updateUnderline = () => {
+      if (!categories || categories.length === 0) return
+      
       const activeIndex = categories.findIndex((cat) => cat.id === activeSection)
       const activeButton = buttonRefs.current[activeIndex]
       const activeTextSpan = activeButton?.querySelector("span")
@@ -108,7 +117,7 @@ export default function CategoryNavigation({ categories }: CategoryNavigationPro
             {categories.map((category, index) => (
               <button
                 key={category.id}
-                ref={(el) => (buttonRefs.current[index] = el)}
+                ref={(el) => { buttonRefs.current[index] = el }}
                 onClick={() => scrollToSection(category.id)}
                 className={`
                 whitespace-nowrap text-sm font-medium transition-colors min-w-fit relative

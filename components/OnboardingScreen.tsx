@@ -22,11 +22,20 @@ const languageOptions: LanguageOption[] = [
 ]
 
 export default function OnboardingScreen() {
-  const { setState } = useAppContext()
+  const { setState, setDishes, setCategories } = useAppContext()
   const [selectedLanguage, setSelectedLanguage] = useState<LanguageOption>(languageOptions[0])
 
   const handleGetStarted = () => {
     setState("idle") // Transition to camera scanner view
+  }
+
+  const handleDemo = () => {
+    // Import mock data for demo
+    import("@/lib/mockData").then(({ mockDishes, mockCategories }) => {
+      setDishes(mockDishes)
+      setCategories(mockCategories)
+      setState("show_cards") // Skip directly to cards view
+    })
   }
 
   return (
@@ -78,16 +87,24 @@ export default function OnboardingScreen() {
 
       {/* Bottom Content Area - Themed text colors */}
       <div className="px-6 sm:px-8 py-8 sm:py-10 pb-safe-bottom flex flex-col items-center text-center">
-        <h1 className="text-3xl sm:text-4xl font-bold mb-2 text-[#2D2A26]">Unlock Menu Secrets</h1>
+        <h1 className="text-3xl sm:text-4xl font-bold mb-2 text-[#2D2A26]">发现菜单秘密</h1>
         <p className="text-base sm:text-lg text-[#6B6B6B] mb-6 max-w-md">
-          Snap a photo, discover dishes, and explore ratings instantly.
+          拍照扫描菜单，即刻发现美食，查看评分推荐。
         </p>
-        <button
-          onClick={handleGetStarted}
-          className="w-full max-w-xs bg-[#2D2A26] text-white font-semibold py-3.5 sm:py-4 rounded-full text-lg hover:bg-[#1e1c1a] transition-colors active:scale-95 shadow-md"
-        >
-          Scan Your First Menu
-        </button>
+        <div className="w-full max-w-xs space-y-3">
+          <button
+            onClick={handleGetStarted}
+            className="w-full bg-[#2D2A26] text-white font-semibold py-3.5 sm:py-4 rounded-full text-lg hover:bg-[#1e1c1a] transition-colors active:scale-95 shadow-md"
+          >
+            扫描菜单
+          </button>
+          <button
+            onClick={handleDemo}
+            className="w-full bg-[#8B7355] text-white font-semibold py-3.5 sm:py-4 rounded-full text-lg hover:bg-[#7a654c] transition-colors active:scale-95 shadow-md"
+          >
+            查看演示
+          </button>
+        </div>
       </div>
     </div>
   )
