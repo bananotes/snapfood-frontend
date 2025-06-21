@@ -72,6 +72,87 @@ body {
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+:root {
+  --header-height: 60px; /* Adjust as needed */
+  --category-nav-height: 50px; /* Adjust as needed */
+  --bottom-nav-height: 64px; /* If you have a bottom navigation */
+
+  /* Safe area insets for iOS */
+  --safe-area-inset-top: env(safe-area-inset-top);
+  --safe-area-inset-bottom: env(safe-area-inset-bottom);
+  --safe-area-inset-left: env(safe-area-inset-left);
+  --safe-area-inset-right: env(safe-area-inset-right);
+
+  /* Base Colors */
+  --background: 250 250 249; /* #FAFAF9 - Light Cream */
+  --foreground: 45 42 38; /* #2D2A26 - Dark Brown/Black */
+
+  --card: 255 255 255; /* #FFFFFF - White */
+  --card-foreground: var(--foreground);
+
+  --popover: var(--card);
+  --popover-foreground: var(--card-foreground);
+
+  --primary: 255 109 0; /* #FF6D00 - Bright Orange */
+  --primary-foreground: 255 255 255; /* White */
+
+  --secondary: 245 166 35; /* #F5A623 - Softer Orange/Gold */
+  --secondary-foreground: var(--foreground);
+
+  --muted: 232 230 227; /* #E8E6E3 - Light Gray */
+  --muted-foreground: 115 115 115; /* #737373 - Medium Gray */
+
+  --accent: var(--secondary);
+  --accent-foreground: var(--foreground);
+
+  --destructive: 239 68 68; /* #EF4444 - Red */
+  --destructive-foreground: var(--primary-foreground);
+
+  --border: 221 219 216; /* #DDDCD8 - Lighter Gray for borders */
+  --input: var(--border);
+  --ring: var(--primary);
+
+  --radius: 0.5rem;
+
+  /* Dark Theme (Optional - if you implement dark mode) */
+  --dark-background: 28 28 30; /* #1C1C1E - Almost Black */
+  --dark-foreground: 229 229 231; /* #E5E5E7 - Light Gray */
+  /* ... other dark theme variables ... */
+}
+
+/* Apply padding for fixed header and category navigation */
+/* Ensure your main content area accounts for these fixed elements */
+body {
+  padding-top: var(--header-height); /* If header is always part of layout flow */
+  padding-bottom: var(--category-nav-height); /* If category nav is fixed at bottom */
+  /* Adjust if your layout is different, e.g. main content has padding */
+}
+
+/* Add this if your main scrollable container needs padding */
+/* For example, if app/page.tsx has <main className="pt-[var(--header-height)] ..."> */
+/* Then you might not need body padding-top, but ensure the main container has it. */
+
+/* For CameraScanner.tsx safe area padding */
+.pt-safe-top {
+  padding-top: var(--safe-area-inset-top);
+}
+.pb-safe-bottom {
+  padding-bottom: var(--safe-area-inset-bottom);
+}
+.pl-safe-left {
+  padding-left: var(--safe-area-inset-left);
+}
+.pr-safe-right {
+  padding-right: var(--safe-area-inset-right);
+}
+
+/* Ensure video element in CameraScanner is set up for mobile */
+video {
+  object-fit: cover; /* Ensures video covers the area, might crop */
+  width: 100%;
+  height: 100%;
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;

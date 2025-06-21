@@ -8,10 +8,16 @@ import { useAppContext } from "@/contexts/AppContext"
 import { processImage } from "@/utils/ocr"
 
 export default function CameraScanner() {
-  const { setState, setProgress, setError } = useAppContext()
+  const { setState, setProgress, setError, setDishes, setCategories } = useAppContext() // Assuming setDishes and setCategories might be needed from context
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const [stream, setStream] = useState<MediaStream | null>(null)
+
+  // Use a ref to manage the stream internally to avoid useEffect loops with `stream` state as dependency
+  const _streamRef = useRef<MediaStream | null>(null)
+  // Keep a state for stream if other parts of the component need to react to it,
+  // but primary control for start/stop will use the ref.
+  const [currentStream, setCurrentStream] = useState<MediaStream | null>(null)
+
   const [cameraError, setCameraError] = useState<string | null>(null)
   const [isCameraReady, setIsCameraReady] = useState(false)
 
@@ -21,22 +27,33 @@ export default function CameraScanner() {
         setState("ocr_processing")
         setProgress(10)
 
-        const result = await processImage(file, (ocrProgress) => {
-          setProgress(10 + ocrProgress * 0.6)
+        const ocrResult = await processImage(file, (ocrProgress) => {
+          setProgress(10 + ocrProgress * 0.6) // 10% to 70% for OCR
         })
 
         setProgress(70)
         setState("querying")
 
-        const response = await fetch("/api/query", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ dishes: result.dishes }),
-        })
+        // Store OCR results in context
+        setDishes(ocrResult.dishes)
+        setCategories(ocrResult.categories)
 
-        if (!response.ok) {
-          console.warn("API request failed, proceeding with OCR results or mock data.")
-        }
+        // Simulate API call delay or handle actual API call
+        // const response = await fetch("/api/query", {
+        //   method: "POST",
+        //   headers: { "Content-Type": "application/json" },
+        //   body: JSON.stringify({ dishes: ocrResult.dishes }),
+        // })
+
+        // if (!response.ok) {
+        //   console.warn("API request failed, proceeding with OCR results or mock data.")
+        //   // Potentially use mock data or just OCR results if API fails
+        // }
+        // const apiData = await response.json();
+        // setDishes(apiData.dishes); // Assuming API might refine dishes
+        // setCategories(apiData.categories); // Assuming API might refine categories
+
+        await new Promise((resolve) => setTimeout(resolve, 500)) // Simulate network latency for querying
 
         setProgress(100)
         setTimeout(() => {
@@ -48,43 +65,83 @@ export default function CameraScanner() {
         setState("error")
       }
     },
-    [setState, setProgress, setError],
+    [setState, setProgress, setError, setDishes, setCategories],
   )
 
   const startCamera = useCallback(async () => {
+    if (_streamRef.current) {
+      _streamRef.current.getTracks().forEach((track) => track.stop())
+      _streamRef.current = null
+    }
+    setCurrentStream(null)
+    setIsCameraReady(false)
+    setCameraError(null)
+
     try {
-      if (stream) {
-        stream.getTracks().forEach((track) => track.stop())
-      }
       const mediaStream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: "environment" },
       })
-      setStream(mediaStream)
+      _streamRef.current = mediaStream
+      setCurrentStream(mediaStream)
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream
         videoRef.current.onloadedmetadata = () => {
           setIsCameraReady(true)
         }
+        // Ensure video plays if autoplay is not consistent
+        await videoRef.current.play().catch((err) => {
+          console.warn("Video play() failed, possibly due to browser policy:", err)
+          // Some browsers require user interaction to play video even if muted
+        })
       }
       setCameraError(null)
     } catch (err) {
       console.error("Error accessing camera:", err)
-      setCameraError("Could not access camera. Please check permissions and try again.")
+      let errorMessage = "Could not access camera. Please check permissions and try again."
+      if (err instanceof DOMException) {
+        if (err.name === "NotAllowedError" || err.name === "PermissionDeniedError") {
+          errorMessage =
+            "Camera access denied. Please enable camera permissions in your browser/system settings and try again."
+        } else if (err.name === "NotFoundError" || err.name === "DevicesNotFoundError") {
+          errorMessage = "No camera found. Please ensure a camera is connected and enabled."
+        } else if (
+          err.name === "NotReadableError" ||
+          err.name === "TrackStartError" ||
+          err.name === "OverconstrainedError" ||
+          err.name === "ConstraintNotSatisfiedError"
+        ) {
+          errorMessage =
+            "Camera is busy, not supported, or hardware error. Try closing other apps using the camera or check camera settings."
+        } else if (err.name === "AbortError") {
+          errorMessage = "Camera access was aborted. Please try again."
+        } else {
+          errorMessage = `Camera error: ${err.message} (${err.name}). Please try again.`
+        }
+      }
+      setCameraError(errorMessage)
       setIsCameraReady(false)
+      if (_streamRef.current) {
+        _streamRef.current.getTracks().forEach((track) => track.stop())
+        _streamRef.current = null
+      }
+      setCurrentStream(null)
     }
-  }, [stream]) // Keep stream dependency to re-init if stream changes externally, though unlikely here.
+  }, [videoRef, setCurrentStream, setIsCameraReady, setCameraError]) // Dependencies are stable setters or refs
 
   useEffect(() => {
-    startCamera()
+    startCamera() // Attempt to start camera on mount
     return () => {
-      if (stream) {
-        stream.getTracks().forEach((track) => track.stop())
+      // Cleanup when component unmounts
+      if (_streamRef.current) {
+        _streamRef.current.getTracks().forEach((track) => track.stop())
+        _streamRef.current = null
       }
+      setCurrentStream(null)
     }
-  }, [startCamera])
+  }, [startCamera]) // `startCamera` callback is stable now
 
   const captureImage = useCallback(() => {
-    if (videoRef.current && canvasRef.current && isCameraReady) {
+    if (videoRef.current && canvasRef.current && isCameraReady && _streamRef.current) {
       const video = videoRef.current
       const canvas = canvasRef.current
       canvas.width = video.videoWidth
@@ -96,12 +153,14 @@ export default function CameraScanner() {
           (blob) => {
             if (blob) {
               const file = new File([blob], `capture-${Date.now()}.jpg`, { type: "image/jpeg" })
-              handleFile(file)
-              if (stream) {
-                stream.getTracks().forEach((track) => track.stop())
-                setStream(null)
-                setIsCameraReady(false)
+              handleFile(file) // Process the file
+              // Stop the camera stream after capture
+              if (_streamRef.current) {
+                _streamRef.current.getTracks().forEach((track) => track.stop())
+                _streamRef.current = null
               }
+              setCurrentStream(null)
+              setIsCameraReady(false)
             }
           },
           "image/jpeg",
@@ -109,11 +168,18 @@ export default function CameraScanner() {
         )
       }
     }
-  }, [isCameraReady, handleFile, stream])
+  }, [isCameraReady, handleFile, videoRef, canvasRef, setCurrentStream, setIsCameraReady])
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (file) {
+      // Stop camera if it's running before processing uploaded file
+      if (_streamRef.current) {
+        _streamRef.current.getTracks().forEach((track) => track.stop())
+        _streamRef.current = null
+        setCurrentStream(null)
+        setIsCameraReady(false)
+      }
       handleFile(file)
     }
   }
