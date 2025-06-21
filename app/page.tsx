@@ -5,16 +5,17 @@ import Header from "@/components/Header"
 import UploadZone from "@/components/UploadZone"
 import ProgressBar from "@/components/ProgressBar"
 import CategoryNavigation from "@/components/CategoryNavigation"
-import DietaryFilterBubbles from "@/components/DietaryFilterBubbles" // Import should now work
+import DietaryFilterBubbles from "@/components/DietaryFilterBubbles"
 import ScrollableDishList from "@/components/ScrollableDishList"
 import CuteLoadingAnimation from "@/components/CuteLoadingAnimation"
 import Toast from "@/components/Toast"
+import SearchOverlay from "@/components/SearchOverlay" // Import SearchOverlay
 import { AppProvider, useAppContext, type Dish, type Category } from "@/contexts/AppContext"
 
 const queryClient = new QueryClient()
 
 function AppContent() {
-  const { state, dishes, categories, error, clearError, setDishes, setCategories } = useAppContext()
+  const { state, dishes, categories, error, clearError, setDishes, setCategories, isSearchActive } = useAppContext()
 
   // Set mock dishes and categories when showing cards state
   React.useEffect(() => {
@@ -169,7 +170,7 @@ function AppContent() {
       <ProgressBar />
       <Header />
 
-      <main>
+      <main className={isSearchActive ? "hidden" : ""}>
         {state === "idle" && (
           <div className="px-4 py-8">
             <UploadZone />
@@ -185,7 +186,7 @@ function AppContent() {
         {state === "show_cards" && (
           <>
             <CategoryNavigation categories={categories} />
-            <DietaryFilterBubbles /> {/* This component should now be found */}
+            <DietaryFilterBubbles />
             <ScrollableDishList dishes={dishes} categories={categories} />
           </>
         )}
@@ -206,6 +207,9 @@ function AppContent() {
       </main>
 
       {error && <Toast message={error} type="error" onClose={clearError} />}
+
+      {/* Render SearchOverlay here */}
+      <SearchOverlay />
     </div>
   )
 }

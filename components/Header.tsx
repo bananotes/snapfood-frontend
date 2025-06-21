@@ -4,21 +4,12 @@ import { useAppContext } from "@/contexts/AppContext"
 import { X, Search } from "lucide-react"
 
 export default function Header() {
-  const { state, setState } = useAppContext()
+  const { state, setState, toggleSearch } = useAppContext()
 
   const isShowingCards = state === "show_cards"
 
   const handleBackToUpload = () => {
     setState("idle")
-    // Potentially clear dishes and categories as well if needed
-    // setDishes([])
-    // setCategories([])
-  }
-
-  const handleSearchClick = () => {
-    // Placeholder for search functionality
-    // You can expand this later to open a search bar or modal
-    console.log("Search icon clicked")
   }
 
   return (
@@ -40,7 +31,6 @@ export default function Header() {
           {isShowingCards ? (
             <>
               <h1 className="text-lg font-semibold text-[#2D2A26] truncate">Golden Dragon Restaurant</h1>
-              {/* Removed subtitle to simplify, can be added back if needed */}
             </>
           ) : (
             <>
@@ -53,7 +43,7 @@ export default function Header() {
 
         {isShowingCards ? (
           <button
-            onClick={handleSearchClick}
+            onClick={toggleSearch}
             className="p-2 text-gray-700 hover:text-black rounded-full transition-all duration-100 ease-in-out active:bg-gray-100 active:scale-90"
             aria-label="Search dishes"
           >

@@ -27,6 +27,7 @@ interface AppContextType {
   activeCategory: string
   progress: number
   error: string | null
+  isSearchActive: boolean
   setState: (state: AppState) => void
   setDishes: (dishes: Dish[]) => void
   setCategories: (categories: Category[]) => void
@@ -34,6 +35,7 @@ interface AppContextType {
   setProgress: (progress: number) => void
   setError: (error: string) => void
   clearError: () => void
+  toggleSearch: () => void
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined)
@@ -46,6 +48,7 @@ type Action =
   | { type: "SET_PROGRESS"; payload: number }
   | { type: "SET_ERROR"; payload: string }
   | { type: "CLEAR_ERROR" }
+  | { type: "TOGGLE_SEARCH" }
 
 interface State {
   state: AppState
@@ -54,6 +57,7 @@ interface State {
   activeCategory: string
   progress: number
   error: string | null
+  isSearchActive: boolean
 }
 
 const initialState: State = {
@@ -63,6 +67,7 @@ const initialState: State = {
   activeCategory: "推荐",
   progress: 0,
   error: null,
+  isSearchActive: false,
 }
 
 function appReducer(state: State, action: Action): State {
@@ -81,6 +86,8 @@ function appReducer(state: State, action: Action): State {
       return { ...state, error: action.payload, state: "error" }
     case "CLEAR_ERROR":
       return { ...state, error: null, state: "idle" }
+    case "TOGGLE_SEARCH":
+      return { ...state, isSearchActive: !state.isSearchActive }
     default:
       return state
   }
@@ -98,6 +105,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setProgress: (progress: number) => dispatch({ type: "SET_PROGRESS", payload: progress }),
     setError: (error: string) => dispatch({ type: "SET_ERROR", payload: error }),
     clearError: () => dispatch({ type: "CLEAR_ERROR" }),
+    toggleSearch: () => dispatch({ type: "TOGGLE_SEARCH" }),
   }
 
   return <AppContext.Provider value={contextValue}>{children}</AppContext.Provider>
