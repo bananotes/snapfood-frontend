@@ -36,7 +36,7 @@ importers:
         specifier: ^18
         version: 18.0.0(react@18.0.0)
       react-dropzone:
-        specifier: latest
+        specifier: ^14.2.3
         version: 14.3.8(react@18.0.0)
       tailwind-merge:
         specifier: ^2.5.5

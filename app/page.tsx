@@ -2,14 +2,16 @@
 import React from "react"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import Header from "@/components/Header"
-import UploadZone from "@/components/UploadZone"
+// UploadZone is no longer the primary initial view
+// import UploadZone from "@/components/UploadZone"
+import CameraScanner from "@/components/CameraScanner" // Import CameraScanner
 import ProgressBar from "@/components/ProgressBar"
 import CategoryNavigation from "@/components/CategoryNavigation"
 import DietaryFilterBubbles from "@/components/DietaryFilterBubbles"
 import ScrollableDishList from "@/components/ScrollableDishList"
 import CuteLoadingAnimation from "@/components/CuteLoadingAnimation"
 import Toast from "@/components/Toast"
-import SearchOverlay from "@/components/SearchOverlay" // Import SearchOverlay
+import SearchOverlay from "@/components/SearchOverlay"
 import { AppProvider, useAppContext, type Dish, type Category } from "@/contexts/AppContext"
 
 const queryClient = new QueryClient()
@@ -165,18 +167,19 @@ function AppContent() {
     }
   }, [state, dishes.length, setDishes, setCategories])
 
+  // Determine what to render based on app state
+  if (state === "idle") {
+    return <CameraScanner />
+  }
+
   return (
     <div className="min-h-screen bg-[#FAFAF9]">
+      {/* ProgressBar and Header are only shown when not in idle (camera) state */}
       <ProgressBar />
       <Header />
 
       <main className={isSearchActive ? "hidden" : ""}>
-        {state === "idle" && (
-          <div className="px-4 py-8">
-            <UploadZone />
-          </div>
-        )}
-
+        {/* No UploadZone here anymore for initial state */}
         {(state === "ocr_processing" || state === "querying") && (
           <div className="px-4">
             <CuteLoadingAnimation />
@@ -207,8 +210,6 @@ function AppContent() {
       </main>
 
       {error && <Toast message={error} type="error" onClose={clearError} />}
-
-      {/* Render SearchOverlay here */}
       <SearchOverlay />
     </div>
   )
