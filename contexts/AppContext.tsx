@@ -2,7 +2,8 @@
 
 import { createContext, useContext, useReducer, type ReactNode } from "react"
 
-export type AppState = "idle" | "ocr_processing" | "querying" | "show_cards" | "error"
+// Add 'onboarding' to AppState
+export type AppState = "onboarding" | "idle" | "ocr_processing" | "querying" | "show_cards" | "error"
 
 export interface Dish {
   name: string
@@ -60,8 +61,9 @@ interface State {
   isSearchActive: boolean
 }
 
+// Set initial state to 'onboarding'
 const initialState: State = {
-  state: "idle",
+  state: "onboarding", // Changed from "idle"
   dishes: [],
   categories: [],
   activeCategory: "推荐",
@@ -73,6 +75,10 @@ const initialState: State = {
 function appReducer(state: State, action: Action): State {
   switch (action.type) {
     case "SET_STATE":
+      // When clearing error, if current state is error, go to onboarding, else idle
+      if (action.payload === "idle" && state.state === "error") {
+        return { ...state, state: "onboarding", error: null }
+      }
       return { ...state, state: action.payload }
     case "SET_DISHES":
       return { ...state, dishes: action.payload }
@@ -85,7 +91,8 @@ function appReducer(state: State, action: Action): State {
     case "SET_ERROR":
       return { ...state, error: action.payload, state: "error" }
     case "CLEAR_ERROR":
-      return { ...state, error: null, state: "idle" }
+      // When error is cleared, go back to onboarding screen
+      return { ...state, error: null, state: "onboarding" }
     case "TOGGLE_SEARCH":
       return { ...state, isSearchActive: !state.isSearchActive }
     default:
