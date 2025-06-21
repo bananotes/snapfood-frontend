@@ -54,6 +54,11 @@ body {
   --border-color: #e8e6e3;
 }
 
+/* Enhanced transition for sliding underline */
+.sliding-underline {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;

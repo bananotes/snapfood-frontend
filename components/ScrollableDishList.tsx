@@ -23,18 +23,24 @@ export default function ScrollableDishList({ dishes, categories }: ScrollableDis
 
   return (
     <>
-      <div className="bg-[#FAFAF9] min-h-screen">
-        {categories.map((category) => (
-          <section key={category.id} id={`section-${category.id}`} className="mb-6">
-            {/* Remove sticky positioning from category title */}
-            <div className="bg-[#FAFAF9] px-4 py-4">
+      <div className="bg-[#FAFAF9] min-h-screen pb-20">
+        {/* Added pb-20 for bottom padding */}
+        {categories.map((category, index) => (
+          <section
+            key={category.id}
+            id={`section-${category.id}`}
+            className={`${index === 0 ? "pt-4" : "pt-6"} ${index === categories.length - 1 ? "mb-20" : "mb-6"}`}
+          >
+            {/* Added extra margin bottom for last section */}
+            {/* Category title */}
+            <div className="bg-[#FAFAF9] px-4 pb-4">
               <h2 className="text-lg font-semibold text-[#2D2A26]">{category.name}</h2>
             </div>
 
             <div className="bg-white mx-4 rounded-lg shadow-sm">
               <div className="divide-y divide-[#E8E6E3]">
-                {groupedDishes[category.id]?.map((dish, index) => (
-                  <DishListItem key={`${category.id}-${index}`} dish={dish} onClick={() => setSelectedDish(dish)} />
+                {groupedDishes[category.id]?.map((dish, dishIndex) => (
+                  <DishListItem key={`${category.id}-${dishIndex}`} dish={dish} onClick={() => setSelectedDish(dish)} />
                 ))}
               </div>
             </div>

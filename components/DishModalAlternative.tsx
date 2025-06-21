@@ -88,7 +88,7 @@ export default function DishModalAlternative({ dish, onClose }: DishModalProps) 
             </div>
           </div>
 
-          <div className="p-6">
+          <div className="p-6 pb-6">
             <h3 className="text-xl font-semibold text-[#2D2A26] mb-2">{dish.name}</h3>
 
             {dish.price && <div className="text-2xl font-bold text-[#8B7355] mb-3">{dish.price}</div>}
@@ -110,7 +110,7 @@ export default function DishModalAlternative({ dish, onClose }: DishModalProps) 
               <p className="text-[#6B6B6B] leading-relaxed">{dish.summary}</p>
             </div>
 
-            <div className="mb-6">
+            <div className="mb-4">
               <h4 className="font-medium text-[#2D2A26] mb-3">Customer Reviews</h4>
               <div className="space-y-3">
                 {mockReviews.map((review, index) => (
@@ -121,9 +121,7 @@ export default function DishModalAlternative({ dish, onClose }: DishModalProps) 
               </div>
             </div>
 
-            <button className="w-full bg-[#8B7355] text-white py-3 rounded-lg font-medium hover:bg-[#6B5B47] transition-colors active:bg-[#5A4A3A]">
-              Add to Cart
-            </button>
+            {/* Removed the "Add to Cart" button */}
           </div>
         </div>
       </div>

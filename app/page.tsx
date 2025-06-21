@@ -5,6 +5,7 @@ import Header from "@/components/Header"
 import UploadZone from "@/components/UploadZone"
 import ProgressBar from "@/components/ProgressBar"
 import CategoryNavigation from "@/components/CategoryNavigation"
+import DietaryFilterBubbles from "@/components/DietaryFilterBubbles" // Import should now work
 import ScrollableDishList from "@/components/ScrollableDishList"
 import CuteLoadingAnimation from "@/components/CuteLoadingAnimation"
 import Toast from "@/components/Toast"
@@ -131,13 +132,31 @@ function AppContent() {
           description: "Steamed eggs with silky texture, garnished with scallions",
           category: "Appetizers",
         },
+        {
+          name: "Cold Sesame Noodles",
+          rating: 4.4,
+          price: "$10.50",
+          photoUrl: "/placeholder.svg?height=300&width=300",
+          summary: "Refreshing cold noodles with rich sesame sauce",
+          description: "Perfect summer dish, creamy sesame dressing with fresh vegetables",
+          category: "Appetizers",
+        },
+        {
+          name: "Cucumber Salad",
+          rating: 4.1,
+          price: "$7.80",
+          photoUrl: "/placeholder.svg?height=300&width=300",
+          summary: "Light and refreshing, perfect palate cleanser",
+          description: "Crisp cucumbers with garlic and vinegar dressing",
+          category: "Appetizers",
+        },
       ]
 
       const mockCategories: Category[] = [
         { id: "Recommended", name: "Recommended", count: 3 },
         { id: "Hot Dishes", name: "Hot Dishes", count: 3 },
         { id: "Vegetables", name: "Vegetables", count: 3 },
-        { id: "Appetizers", name: "Appetizers", count: 3 },
+        { id: "Appetizers", name: "Appetizers", count: 5 },
       ]
 
       setDishes(mockDishes)
@@ -166,6 +185,7 @@ function AppContent() {
         {state === "show_cards" && (
           <>
             <CategoryNavigation categories={categories} />
+            <DietaryFilterBubbles /> {/* This component should now be found */}
             <ScrollableDishList dishes={dishes} categories={categories} />
           </>
         )}
