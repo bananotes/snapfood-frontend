@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import MenuDisplay from '@/components/MenuDisplay';
 
 export default function DemoPage() {
   const [file, setFile] = useState<File | null>(null);
@@ -8,6 +9,7 @@ export default function DemoPage() {
   const [longitude, setLongitude] = useState('');
   const [latitude, setLatitude] = useState('');
   const [loading, setLoading] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [locationStatus, setLocationStatus] = useState<
@@ -35,7 +37,6 @@ export default function DemoPage() {
       error => {
         console.log('Location access denied:', error);
         setLocationStatus('denied');
-        // Leave coordinates empty when denied
         setLongitude('');
         setLatitude('');
       },
@@ -90,6 +91,27 @@ export default function DemoPage() {
       setLoading(false);
     }
   };
+
+  // If we have successful results with dishes, show the menu display
+  if (result?.data?.outputs?.dishes) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="bg-white shadow-sm border-b mb-8">
+          <div className="max-w-7xl mx-auto px-4 py-4">
+            <button
+              onClick={() => setResult(null)}
+              className="text-blue-600 hover:text-blue-800 font-medium">
+              ← Back to Upload
+            </button>
+          </div>
+        </div>
+        <MenuDisplay
+          dishes={result.data.outputs.dishes}
+          restaurants={result.data.outputs.restaurants || []}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4">
@@ -197,7 +219,7 @@ export default function DemoPage() {
             </div>
           )}
 
-          {result && (
+          {result && !result.data?.outputs?.dishes && (
             <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-md">
               <h3 className="text-lg font-medium text-green-800 mb-3">
                 Analysis Result

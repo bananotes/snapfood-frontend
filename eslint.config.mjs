@@ -20,7 +20,6 @@ const eslintConfig = [
     rules: {
       quotes: ['error', 'single'],
       semi: ['error', 'always'],
-      'prettier/prettier': [],
     },
   },
 ];
