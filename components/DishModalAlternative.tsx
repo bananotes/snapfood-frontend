@@ -1,130 +1,106 @@
-"use client"
+'use client';
 
-import { useEffect } from "react"
-import { X, Star } from "lucide-react"
-import type { Dish } from "@/contexts/AppContext"
-import Image from "next/image"
+import { useEffect } from 'react';
+import { X, Star } from 'lucide-react';
+import type { Dish } from '@/contexts/AppContext';
+import Image from 'next/image';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 
 interface DishModalProps {
-  dish: Dish
-  onClose: () => void
+  dish: Dish;
+  isOpen: boolean;
+  onClose: () => void;
 }
 
-export default function DishModalAlternative({ dish, onClose }: DishModalProps) {
+export default function DishModalAlternative({
+  dish,
+  isOpen,
+  onClose,
+}: DishModalProps) {
+  if (!isOpen || !dish) return null;
+
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        onClose()
+      if (e.key === 'Escape') {
+        onClose();
       }
-    }
+    };
 
-    document.addEventListener("keydown", handleEscape)
-    document.body.style.overflow = "hidden"
+    document.addEventListener('keydown', handleEscape);
+    document.body.style.overflow = 'hidden';
 
     return () => {
-      document.removeEventListener("keydown", handleEscape)
-      document.body.style.overflow = "unset"
-    }
-  }, [onClose])
-
-  const renderStars = (rating: number) => {
-    const stars = []
-    const fullStars = Math.floor(rating)
-    const hasHalfStar = rating % 1 !== 0
-
-    for (let i = 0; i < fullStars; i++) {
-      stars.push(<Star key={i} className="w-5 h-5 fill-[#8B7355] text-[#8B7355]" />)
-    }
-
-    if (hasHalfStar) {
-      stars.push(
-        <div key="half" className="relative">
-          <Star className="w-5 h-5 text-gray-300" />
-          <div className="absolute inset-0 overflow-hidden w-1/2">
-            <Star className="w-5 h-5 fill-[#8B7355] text-[#8B7355]" />
-          </div>
-        </div>,
-      )
-    }
-
-    const remainingStars = 5 - Math.ceil(rating)
-    for (let i = 0; i < remainingStars; i++) {
-      stars.push(<Star key={`empty-${i}`} className="w-5 h-5 text-gray-300" />)
-    }
-
-    return stars
-  }
+      document.removeEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'unset';
+    };
+  }, [onClose]);
 
   const mockReviews = [
-    "Authentic taste, generous portion, great value for money!",
-    "Expertly prepared, rich layers of flavor, highly recommended.",
-    "Classic dish, order it every time, never disappoints.",
-  ]
+    'Authentic taste, generous portion, great value for money!',
+    'Expertly prepared, rich layers of flavor, highly recommended.',
+    'Classic dish, order it every time, never disappoints.',
+  ];
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
-      {/* Backdrop */}
-      <div className="fixed inset-0 bg-black bg-opacity-40 transition-opacity" onClick={onClose} />
+    <div
+      className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center"
+      onClick={onClose}>
+      <div
+        className="bg-white rounded-2xl shadow-xl w-full max-w-md m-4 p-6 relative animate-in-up"
+        onClick={e => e.stopPropagation()}>
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 z-10 p-2 bg-black bg-opacity-50 rounded-full text-white hover:bg-opacity-70 transition-colors">
+          <X className="w-5 h-5" />
+        </button>
 
-      {/* Modal */}
-      <div className="flex min-h-full items-center justify-center p-4">
-        <div className="relative w-full max-w-md transform overflow-hidden rounded-2xl bg-white text-left shadow-xl transition-all">
-          <div className="relative">
-            <button
-              onClick={onClose}
-              className="absolute top-4 right-4 z-10 p-2 bg-black bg-opacity-50 rounded-full text-white hover:bg-opacity-70 transition-colors"
-            >
-              <X className="w-5 h-5" />
-            </button>
+        <div className="aspect-square relative">
+          <Image
+            src="/placeholder.jpg"
+            alt={dish.name}
+            fill
+            className="object-cover"
+            crossOrigin="anonymous"
+          />
+        </div>
 
-            <div className="aspect-square relative">
-              <Image
-                src={dish.photoUrl || "/placeholder.svg"}
-                alt={dish.name}
-                fill
-                className="object-cover"
-                crossOrigin="anonymous"
-              />
-            </div>
-          </div>
+        <div className="mt-4">
+          <h2 className="text-3xl font-bold text-[#2D2A26] mb-2">
+            {dish.name}
+          </h2>
+          <p className="text-lg font-semibold text-[#FF6D28] mb-4">
+            {dish.price}
+          </p>
+          <p className="text-md text-[#6B6B6B] leading-relaxed mb-6">
+            {dish.gen_desc}
+          </p>
 
-          <div className="p-6 pb-6">
-            <h3 className="text-xl font-semibold text-[#2D2A26] mb-2">{dish.name}</h3>
-
-            {dish.price && <div className="text-2xl font-bold text-[#8B7355] mb-3">{dish.price}</div>}
-
-            <div className="flex items-center space-x-1 mb-4">
-              {renderStars(dish.rating)}
-              <span className="text-lg font-medium text-[#2D2A26] ml-2">{dish.rating.toFixed(1)}</span>
-              <span className="text-sm text-[#6B6B6B] ml-1">({Math.round((dish.rating / 5) * 100)}% positive)</span>
-            </div>
-
-            {dish.description && (
-              <div className="mb-4">
-                <p className="text-[#2D2A26] leading-relaxed">{dish.description}</p>
-              </div>
-            )}
-
-            <div className="mb-6">
-              <h4 className="font-medium text-[#2D2A26] mb-2">About this dish</h4>
-              <p className="text-[#6B6B6B] leading-relaxed">{dish.summary}</p>
-            </div>
-
+          {dish.vegen_desc && (
             <div className="mb-4">
-              <h4 className="font-medium text-[#2D2A26] mb-3">Customer Reviews</h4>
-              <div className="space-y-3">
-                {mockReviews.map((review, index) => (
-                  <div key={index} className="bg-[#FAFAF9] rounded-lg p-3">
-                    <p className="text-sm text-[#2D2A26]">"{review}"</p>
-                  </div>
-                ))}
-              </div>
+              <Badge className="bg-green-100 text-green-800">素食</Badge>
             </div>
+          )}
 
-            {/* Removed the "Add to Cart" button */}
+          <div>
+            <h3 className="text-xl font-semibold text-[#2D2A26] mb-3">
+              关于这道菜
+            </h3>
+            <p className="text-[#2D2A26] leading-relaxed">{dish.gen_desc}</p>
+          </div>
+        </div>
+
+        <div className="mb-4">
+          <h4 className="font-medium text-[#2D2A26] mb-3">Customer Reviews</h4>
+          <div className="space-y-3">
+            {mockReviews.map((review, index) => (
+              <div key={index} className="bg-[#FAFAF9] rounded-lg p-3">
+                <p className="text-sm text-[#2D2A26]">"{review}"</p>
+              </div>
+            ))}
           </div>
         </div>
       </div>
     </div>
-  )
+  );
 }
