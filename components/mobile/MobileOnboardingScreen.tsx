@@ -2,35 +2,13 @@
 
 import { useState } from 'react';
 import { useAppContext } from '@/contexts/AppContext';
+import { useTranslation } from '@/contexts/I18nContext';
 import Image from 'next/image';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { Camera, Sparkles, Star, Zap } from 'lucide-react';
-
-interface LanguageOption {
-  code: string;
-  name: string;
-  flag: string;
-}
-
-const languageOptions: LanguageOption[] = [
-  { code: 'EN', name: 'English', flag: '🇺🇸' },
-  { code: '中文', name: 'Chinese', flag: '🇨🇳' },
-  { code: 'ES', name: 'Español', flag: '🇪🇸' },
-  { code: 'FR', name: 'Français', flag: '🇫🇷' },
-  { code: '日本語', name: 'Japanese', flag: '🇯🇵' },
-  { code: '한국어', name: 'Korean', flag: '🇰🇷' },
-];
 
 export default function MobileOnboardingScreen() {
   const { setState, setDishes, setCategories } = useAppContext();
-  const [selectedLanguage, setSelectedLanguage] = useState<LanguageOption>(
-    languageOptions[1],
-  ); // Default to Chinese
+  const { t } = useTranslation();
 
   const handleGetStarted = () => {
     setState('idle');
@@ -46,37 +24,6 @@ export default function MobileOnboardingScreen() {
 
   return (
     <div className="flex flex-col h-screen bg-gradient-to-br from-[#FAFAF9] to-[#F5F4F2] text-[#2D2A26]">
-      {/* Top Right Language Switcher */}
-      <div className="absolute top-0 right-0 p-4 pt-safe-top z-10">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button
-              className="flex items-center justify-center w-12 h-12 bg-white/90 backdrop-blur-sm rounded-full shadow-lg hover:bg-white active:scale-95 transition-all border border-[#E8E6E3] touch-manipulation"
-              aria-label="选择语言">
-              <span className="text-xl">{selectedLanguage.flag}</span>
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            align="end"
-            className="bg-white/95 backdrop-blur-sm border-[#E8E6E3] shadow-xl w-48 rounded-2xl">
-            {languageOptions.map(option => (
-              <DropdownMenuItem
-                key={option.code}
-                onClick={() => setSelectedLanguage(option)}
-                className="hover:bg-[#F5F4F2] cursor-pointer text-sm py-3 px-4 flex items-center touch-manipulation">
-                <span className="text-lg mr-3">{option.flag}</span>
-                <span className="flex-1 text-[#2D2A26]">{option.name}</span>
-                {selectedLanguage.code === option.code && (
-                  <span className="text-xs text-[#8B7355] ml-auto font-medium">
-                    ✓
-                  </span>
-                )}
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-
       {/* Main Content */}
       <div className="flex-1 flex flex-col items-center justify-center px-6 pt-8 pb-4">
         {/* App Icon and Title */}
@@ -88,7 +35,9 @@ export default function MobileOnboardingScreen() {
           <h1 className="text-3xl font-bold mb-2 text-[#2D2A26]">
             <span className="text-[#8B7355]">Snap</span>Dish
           </h1>
-          <p className="text-lg text-[#6B6B6B] font-medium">发现菜单秘密</p>
+          <p className="text-lg text-[#6B6B6B] font-medium">
+            {t('onboarding.subtitle')}
+          </p>
         </div>
 
         {/* Feature Highlights */}
@@ -100,9 +49,9 @@ export default function MobileOnboardingScreen() {
               </div>
               <div>
                 <h3 className="font-semibold text-[#2D2A26] text-sm">
-                  智能扫描
+                  {t('camera.title')}
                 </h3>
-                <p className="text-xs text-[#6B6B6B]">拍照即可识别菜单内容</p>
+                <p className="text-xs text-[#6B6B6B]">{t('camera.subtitle')}</p>
               </div>
             </div>
           </div>
@@ -113,8 +62,12 @@ export default function MobileOnboardingScreen() {
                 <Sparkles className="w-5 h-5 text-green-600" />
               </div>
               <div>
-                <h3 className="font-semibold text-[#2D2A26] text-sm">AI分析</h3>
-                <p className="text-xs text-[#6B6B6B]">深度分析菜品信息和推荐</p>
+                <h3 className="font-semibold text-[#2D2A26] text-sm">
+                  AI {t('common.analysis')}
+                </h3>
+                <p className="text-xs text-[#6B6B6B]">
+                  {t('dish.detailedDescription')}
+                </p>
               </div>
             </div>
           </div>
@@ -126,9 +79,11 @@ export default function MobileOnboardingScreen() {
               </div>
               <div>
                 <h3 className="font-semibold text-[#2D2A26] text-sm">
-                  个性化推荐
+                  {t('menu.categories.recommended')}
                 </h3>
-                <p className="text-xs text-[#6B6B6B]">根据您的喜好推荐菜品</p>
+                <p className="text-xs text-[#6B6B6B]">
+                  {t('menu.searchDescription')}
+                </p>
               </div>
             </div>
           </div>
@@ -141,7 +96,7 @@ export default function MobileOnboardingScreen() {
               <div className="text-center">
                 <Zap className="w-12 h-12 text-[#8B7355] mx-auto mb-3" />
                 <p className="text-sm text-[#6B6B6B] font-medium">
-                  菜单扫描演示
+                  {t('onboarding.demoButton')}
                 </p>
               </div>
             </div>
@@ -155,19 +110,19 @@ export default function MobileOnboardingScreen() {
           <button
             onClick={handleGetStarted}
             className="w-full bg-gradient-to-r from-[#8B7355] to-[#7a654c] text-white font-bold py-4 rounded-2xl text-lg hover:from-[#7a654c] hover:to-[#6b5742] transition-all duration-200 ease-in-out active:scale-95 shadow-lg touch-manipulation">
-            开始扫描菜单
+            {t('onboarding.scanMenuButton')}
           </button>
 
           <button
             onClick={handleDemo}
             className="w-full bg-white text-[#2D2A26] font-semibold py-4 rounded-2xl text-lg border-2 border-[#E8E6E3] hover:bg-gray-50 transition-all duration-200 ease-in-out active:scale-95 shadow-sm touch-manipulation">
-            查看演示
+            {t('onboarding.demoButton')}
           </button>
         </div>
 
         {/* Privacy Notice */}
         <p className="text-xs text-[#6B6B6B] text-center mt-4 px-4">
-          我们重视您的隐私，所有图片处理均在本地进行
+          {t('common.privacy')}
         </p>
       </div>
     </div>

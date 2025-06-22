@@ -44,9 +44,24 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     setIsClient(true);
     // Load saved language from localStorage after mount
     const saved = localStorage.getItem('snapfood-language');
-    if (saved && (saved as Language)) {
+    if (saved && languageOptions.some(option => option.code === saved)) {
       setLanguageState(saved as Language);
     }
+
+    // Initialize HTML lang attribute
+    const langMap: Record<string, string> = {
+      en: 'en',
+      zh: 'zh-CN',
+      es: 'es',
+      fr: 'fr',
+      ja: 'ja',
+      ko: 'ko',
+    };
+    const currentLang =
+      saved && languageOptions.some(option => option.code === saved)
+        ? saved
+        : 'en';
+    document.documentElement.lang = langMap[currentLang] || 'en';
   }, []);
 
   const setLanguage = (newLanguage: Language) => {

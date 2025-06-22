@@ -25,6 +25,19 @@ export default function LanguageSwitcher({
   const handleLanguageChange = (newLanguage: string) => {
     setLanguage(newLanguage as any);
     setIsOpen(false);
+
+    // Update HTML lang attribute
+    if (typeof document !== 'undefined') {
+      const langMap: Record<string, string> = {
+        en: 'en',
+        zh: 'zh-CN',
+        es: 'es',
+        fr: 'fr',
+        ja: 'ja',
+        ko: 'ko',
+      };
+      document.documentElement.lang = langMap[newLanguage] || 'en';
+    }
   };
 
   // Don't render dynamic content until client-side hydration is complete
@@ -75,7 +88,7 @@ export default function LanguageSwitcher({
         <button
           className={`px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 text-xs font-semibold shadow transition-colors ${className}`}
           aria-label="Switch language">
-          {language === 'en' ? '中文' : 'EN'}
+          {currentLanguage.nativeName}
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent

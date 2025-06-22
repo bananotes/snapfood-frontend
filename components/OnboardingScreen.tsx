@@ -1,76 +1,30 @@
-"use client"
+'use client';
 
-import { useState } from "react"
-import { useAppContext } from "@/contexts/AppContext"
-import Image from "next/image"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-// ChevronDown is removed
-
-interface LanguageOption {
-  code: string // Will be used for display on the button
-  name: string
-  flag: string // Emoji for simplicity
-}
-
-const languageOptions: LanguageOption[] = [
-  { code: "EN", name: "English", flag: "🇺🇸" },
-  { code: "中文", name: "Chinese", flag: "🇨🇳" }, // Assuming "中文" is the desired 2-char code for Chinese
-  { code: "ES", name: "Español", flag: "🇪🇸" },
-  { code: "FR", name: "Français", flag: "🇫🇷" },
-  { code: "日本語", name: "Japanese", flag: "🇯🇵" }, // Added Japanese as an example
-  { code: "한국어", name: "Korean", flag: "🇰🇷" }, // Added Korean as an example
-]
+import { useState } from 'react';
+import { useAppContext } from '@/contexts/AppContext';
+import { useTranslation } from '@/contexts/I18nContext';
+import Image from 'next/image';
 
 export default function OnboardingScreen() {
-  const { setState, setDishes, setCategories } = useAppContext()
-  const [selectedLanguage, setSelectedLanguage] = useState<LanguageOption>(languageOptions[0])
+  const { setState, setDishes, setCategories } = useAppContext();
+  const { t } = useTranslation();
 
   const handleGetStarted = () => {
-    setState("idle") // Transition to camera scanner view
-  }
+    setState('idle'); // Transition to camera scanner view
+  };
 
   const handleDemo = () => {
     // Import mock data for demo
-    import("@/lib/mockData").then(({ mockDishes, mockCategories }) => {
-      setDishes(mockDishes)
-      setCategories(mockCategories)
-      setState("show_cards") // Skip directly to cards view
-    })
-  }
+    import('@/lib/mockData').then(({ mockDishes, mockCategories }) => {
+      setDishes(mockDishes);
+      setCategories(mockCategories);
+      setState('show_cards'); // Skip directly to cards view
+    });
+  };
 
   return (
     // Updated background and default text color for the screen
     <div className="flex flex-col h-screen bg-[#FAFAF9] text-[#2D2A26]">
-      {/* Top Right Language Switcher - Small circle, no arrow */}
-      <div className="absolute top-0 right-0 p-4 pt-safe-top z-10">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button
-              className="flex items-center justify-center w-12 h-12 bg-white rounded-full shadow-md hover:bg-gray-50 active:scale-95 transition-all border border-[#E8E6E3]"
-              aria-label="Select language"
-            >
-              <span className="text-xl">{selectedLanguage.flag}</span>
-              {/* <span className="font-medium text-xs ml-1">{selectedLanguage.code}</span> */}
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="bg-card border-[#E8E6E3] shadow-lg w-48">
-            {languageOptions.map((option) => (
-              <DropdownMenuItem
-                key={option.code}
-                onClick={() => setSelectedLanguage(option)}
-                className="hover:bg-[#F5F4F2] cursor-pointer text-sm py-2 px-3 flex items-center"
-              >
-                <span className="text-lg mr-2">{option.flag}</span>
-                <span className="flex-1 text-[#2D2A26]">{option.name}</span>
-                {selectedLanguage.code === option.code && (
-                  <span className="text-xs text-[#8B7355] ml-auto">({option.code})</span>
-                )}
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-
       {/* GIF Placeholder Area - Themed */}
       <div className="flex-1 flex items-center justify-center bg-[#E8E6E3] overflow-hidden relative px-4">
         {/* Phone mock styling adjusted */}
@@ -87,25 +41,25 @@ export default function OnboardingScreen() {
 
       {/* Bottom Content Area - Themed text colors */}
       <div className="px-6 sm:px-8 py-8 sm:py-10 pb-safe-bottom flex flex-col items-center text-center">
-        <h1 className="text-3xl sm:text-4xl font-bold mb-2 text-[#2D2A26]">发现菜单秘密</h1>
+        <h1 className="text-3xl sm:text-4xl font-bold mb-2 text-[#2D2A26]">
+          {t('onboarding.title')}
+        </h1>
         <p className="text-base sm:text-lg text-[#6B6B6B] mb-6 max-w-md">
-          拍照扫描菜单，即刻发现美食，查看评分推荐。
+          {t('onboarding.subtitle')}
         </p>
         <div className="w-full max-w-xs space-y-3">
           <button
             onClick={handleGetStarted}
-            className="w-full bg-[#2D2A26] text-white font-semibold py-3.5 sm:py-4 rounded-full text-lg hover:bg-[#1e1c1a] transition-colors active:scale-95 shadow-md"
-          >
-            扫描菜单
+            className="w-full bg-[#2D2A26] text-white font-semibold py-3.5 sm:py-4 rounded-full text-lg hover:bg-[#1e1c1a] transition-colors active:scale-95 shadow-md">
+            {t('onboarding.scanMenuButton')}
           </button>
           <button
             onClick={handleDemo}
-            className="w-full bg-[#8B7355] text-white font-semibold py-3.5 sm:py-4 rounded-full text-lg hover:bg-[#7a654c] transition-colors active:scale-95 shadow-md"
-          >
-            查看演示
+            className="w-full bg-[#8B7355] text-white font-semibold py-3.5 sm:py-4 rounded-full text-lg hover:bg-[#7a654c] transition-colors active:scale-95 shadow-md">
+            {t('onboarding.demoButton')}
           </button>
         </div>
       </div>
     </div>
-  )
+  );
 }

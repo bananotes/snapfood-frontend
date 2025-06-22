@@ -23,7 +23,6 @@ export interface Translations {
     subtitle: string;
     scanMenuButton: string;
     demoButton: string;
-    languageSelector: string;
   };
 
   // Camera Scanner
@@ -114,6 +113,8 @@ export interface Translations {
     match: string;
     menu: string;
     close: string;
+    analysis: string;
+    privacy: string;
   };
 
   // Error Messages
@@ -132,7 +133,6 @@ const translations: Record<Language, Translations> = {
       subtitle: 'Scan your menu and discover amazing dishes',
       scanMenuButton: 'Scan Menu',
       demoButton: 'Try Demo',
-      languageSelector: 'Select Language',
     },
     camera: {
       title: 'Scan Menu',
@@ -215,6 +215,8 @@ const translations: Record<Language, Translations> = {
       match: 'Match',
       menu: 'Menu',
       close: 'Close',
+      analysis: 'Analysis',
+      privacy: 'Privacy',
     },
     errors: {
       networkError: 'Network error. Please check your connection.',
@@ -229,7 +231,6 @@ const translations: Record<Language, Translations> = {
       subtitle: '扫描菜单，发现美味佳肴',
       scanMenuButton: '扫描菜单',
       demoButton: '试用演示',
-      languageSelector: '选择语言',
     },
     camera: {
       title: '扫描菜单',
@@ -310,6 +311,8 @@ const translations: Record<Language, Translations> = {
       match: '匹配',
       menu: '菜单',
       close: '关闭',
+      analysis: '分析',
+      privacy: '我们重视您的隐私，所有图片处理均在本地进行',
     },
     errors: {
       networkError: '网络错误，请检查网络连接。',
@@ -324,7 +327,6 @@ const translations: Record<Language, Translations> = {
       subtitle: 'Escanea tu menú y descubre platos increíbles',
       scanMenuButton: 'Escanear Menú',
       demoButton: 'Probar Demo',
-      languageSelector: 'Seleccionar Idioma',
     },
     camera: {
       title: 'Escanear Menú',
@@ -406,6 +408,8 @@ const translations: Record<Language, Translations> = {
       match: 'Coincidir',
       menu: 'Menú',
       close: 'Cerrar',
+      analysis: 'Análisis',
+      privacy: 'Privacidad',
     },
     errors: {
       networkError: 'Error de red. Verifica tu conexión.',
@@ -420,7 +424,6 @@ const translations: Record<Language, Translations> = {
       subtitle: 'Scannez votre menu et découvrez des plats incroyables',
       scanMenuButton: 'Scanner le Menu',
       demoButton: 'Essayer la Démo',
-      languageSelector: 'Sélectionner la Langue',
     },
     camera: {
       title: 'Scanner le Menu',
@@ -503,6 +506,8 @@ const translations: Record<Language, Translations> = {
       match: 'Coincider',
       menu: 'Menu',
       close: 'Fermer',
+      analysis: 'Analyse',
+      privacy: 'Confidentialité',
     },
     errors: {
       networkError: 'Erreur réseau. Vérifiez votre connexion.',
@@ -517,7 +522,6 @@ const translations: Record<Language, Translations> = {
       subtitle: 'メニューをスキャンして素晴らしい料理を発見',
       scanMenuButton: 'メニューをスキャン',
       demoButton: 'デモを試す',
-      languageSelector: '言語を選択',
     },
     camera: {
       title: 'メニューをスキャン',
@@ -599,6 +603,8 @@ const translations: Record<Language, Translations> = {
       match: '一致',
       menu: 'メニュー',
       close: '閉じる',
+      analysis: '分析',
+      privacy: 'プライバシー',
     },
     errors: {
       networkError: 'ネットワークエラー。接続を確認してください。',
@@ -613,7 +619,6 @@ const translations: Record<Language, Translations> = {
       subtitle: '메뉴를 스캔하고 놀라운 요리를 발견하세요',
       scanMenuButton: '메뉴 스캔',
       demoButton: '데모 시도',
-      languageSelector: '언어 선택',
     },
     camera: {
       title: '메뉴 스캔',
@@ -695,6 +700,8 @@ const translations: Record<Language, Translations> = {
       match: '일치',
       menu: '메뉴',
       close: '닫기',
+      analysis: '분석',
+      privacy: '개인정보',
     },
     errors: {
       networkError: '네트워크 오류. 연결을 확인하세요.',
