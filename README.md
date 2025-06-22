@@ -28,3 +28,18 @@ Continue building your app on:
 2. Deploy your chats from the v0 interface
 3. Changes are automatically pushed to this repository
 4. Vercel deploys the latest version from this repository
+
+<http://localhost:3000/api/image-matcher?name=Urfa%20lahmacun%20(hot)&desc=Very%20thin%20Turkish%20pizza%20covered%20with%20parsley,%20garlic,%20hot%20pepper%20and%20pomegranate%20molasses&gen_desc=Turkish%20pizza&category=hot%20starters&count=6&place_id=ChIJHcPKg-y5yhQREEHS-JpdxuM>
+
+```bash
+curl -X GET \
+  "http://localhost:3000/api/image-matcher" \
+  -G \
+  --data-urlencode "name=Urfa lahmacun (hot)" \
+  --data-urlencode "desc=Very thin Turkish pizza covered with parsley, garlic, hot pepper and pomegranate molasses" \
+  --data-urlencode "gen_desc=Turkish pizza" \
+  --data-urlencode "category=hot starters" \
+  --data-urlencode "count=6" \
+  --data-urlencode "place_id=ChIJHcPKg-y5yhQREEHS-JpdxuM" \
+  -H "Accept: application/json"
+```
