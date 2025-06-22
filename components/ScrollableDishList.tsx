@@ -1,8 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import MobileDishListItem from './mobile/MobileDishListItem';
-import DishDetailModal from './DishDetailModal';
 import { type Dish, type Category } from '@/contexts/AppContext';
 
 // Note: Removed DishModalAlternative as it's no longer used here.
@@ -17,17 +16,11 @@ export default function ScrollableDishList({
   dishes,
   categories,
 }: ScrollableDishListProps) {
-  const [selectedDish, setSelectedDish] = useState<Dish | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const router = useRouter();
 
   const handleDishClick = (dish: Dish) => {
-    setSelectedDish(dish);
-    setIsModalOpen(true);
-  };
-
-  const closeModal = () => {
-    setIsModalOpen(false);
-    setSelectedDish(null);
+    // 导航到独立的菜品详情页
+    router.push(`/dish/${dish.id}`);
   };
 
   const groupDishesByCategory = () => {
@@ -81,13 +74,6 @@ export default function ScrollableDishList({
           </div>
         );
       })}
-
-      {/* 菜品详情浮空窗口 */}
-      <DishDetailModal
-        dish={selectedDish}
-        isOpen={isModalOpen}
-        onClose={closeModal}
-      />
     </div>
   );
 }

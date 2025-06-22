@@ -1,28 +1,49 @@
-"use client"
+'use client';
 
-import { useState } from "react"
-import type { Dish } from "@/contexts/AppContext"
-import DishListItem from "./DishListItem"
-import DishModal from "./DishModalAlternative"
+import { useState } from 'react';
+import type { Dish } from '@/contexts/AppContext';
+import DishListItem from './DishListItem';
+import DishDetailModal from './DishDetailModal';
 
 interface DishListProps {
-  dishes: Dish[]
+  dishes: Dish[];
 }
 
 export default function DishList({ dishes }: DishListProps) {
-  const [selectedDish, setSelectedDish] = useState<Dish | null>(null)
+  const [selectedDish, setSelectedDish] = useState<Dish | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleDishClick = (dish: Dish) => {
+    setSelectedDish(dish);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setTimeout(() => {
+      setSelectedDish(null);
+    }, 300);
+  };
 
   return (
     <>
       <div className="bg-white">
         <div className="divide-y divide-gray-100">
           {dishes.map((dish, index) => (
-            <DishListItem key={index} dish={dish} onClick={() => setSelectedDish(dish)} />
+            <DishListItem
+              key={dish.id || index}
+              dish={dish}
+              onClick={() => handleDishClick(dish)}
+            />
           ))}
         </div>
       </div>
 
-      {selectedDish && <DishModal dish={selectedDish} onClose={() => setSelectedDish(null)} />}
+      <DishDetailModal
+        dish={selectedDish}
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+      />
     </>
-  )
+  );
 }

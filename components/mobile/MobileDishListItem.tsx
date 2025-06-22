@@ -1,105 +1,87 @@
 'use client';
 
-import { Plus, Star, Clock, MapPin } from 'lucide-react';
+import { memo } from 'react';
 import type { Dish } from '@/contexts/AppContext';
 import Image from 'next/image';
+import { useDishThumbnail } from '@/hooks/useDishImage';
+import { useIntersectionObserver } from '@/hooks/useIntersectionObserver';
 
 interface MobileDishListItemProps {
   dish: Dish;
-  onClick?: () => void;
+  onClick: (dish: Dish) => void;
 }
 
-export default function MobileDishListItem({
-  dish,
-  onClick,
-}: MobileDishListItemProps) {
+function MobileDishListItem({ dish, onClick }: MobileDishListItemProps) {
+  const { ref, isIntersecting } = useIntersectionObserver({
+    rootMargin: '200px',
+  });
+
+  const { thumbnailUrl, isLoading, error } = useDishThumbnail(
+    dish.name,
+    dish.category,
+    isIntersecting,
+  );
+
+  const displayImage = thumbnailUrl || '/placeholder.jpg';
+
   return (
     <div
-      onClick={onClick}
-      className="bg-white border-b border-[#F5F4F2] active:bg-[#FAFAF9] transition-colors touch-manipulation">
-      <div className="flex p-4">
-        {/* Dish Image */}
-        <div className="relative flex-shrink-0 mr-4">
-          <div className="w-20 h-20 rounded-2xl overflow-hidden bg-[#F5F4F2] shadow-sm">
-            <Image
-              src="/placeholder.jpg"
-              alt={dish.name}
-              width={80}
-              height={80}
-              className="w-full h-full object-cover"
-              crossOrigin="anonymous"
-            />
-          </div>
+      ref={ref}
+      onClick={() => onClick(dish)}
+      className="flex items-center justify-between p-4 hover:bg-[#FAFAF9] cursor-pointer transition-colors active:bg-[#F5F4F2]">
+      <div className="flex-1 pr-4">
+        <h3 className="text-base font-medium text-[#2D2A26] mb-1 line-clamp-2 leading-tight">
+          {dish.name}
+        </h3>
+        <p className="text-sm text-[#6B6B6B] line-clamp-2">{dish.gen_desc}</p>
+        <div className="flex items-center space-x-2 mt-2">
+          {dish.price && (
+            <span className="text-lg font-semibold text-[#2D2A26]">
+              {dish.price}
+            </span>
+          )}
+          {dish.vegen_desc && (
+            <>
+              <span className="text-[#6B6B6B]">•</span>
+              <span className="text-sm text-green-700">素食</span>
+            </>
+          )}
+        </div>
+      </div>
 
-          {/* Quick Add Button */}
-          <button
-            className="absolute -bottom-1 -right-1 w-8 h-8 bg-white rounded-full shadow-lg flex items-center justify-center border border-[#E8E6E3] hover:bg-[#FAFAF9] transition-colors active:scale-95 touch-manipulation"
-            onClick={e => {
-              e.stopPropagation();
-              // Handle quick add logic
-            }}>
-            <Plus className="w-4 h-4 text-[#8B7355]" />
-          </button>
+      <div className="relative flex-shrink-0">
+        <div className="w-20 h-20 rounded-lg overflow-hidden bg-[#F5F4F2] relative">
+          {isLoading && (
+            <div className="absolute inset-0 bg-gray-100 flex items-center justify-center">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+            </div>
+          )}
+
+          <Image
+            src={displayImage}
+            alt={dish.name}
+            width={80}
+            height={80}
+            className={`w-full h-full object-cover ${
+              isLoading ? 'opacity-0' : 'opacity-100'
+            }`}
+            crossOrigin="anonymous"
+            onError={e => {
+              const target = e.target as HTMLImageElement;
+              target.src = '/placeholder.jpg';
+              target.alt = '图片加载失败';
+            }}
+          />
         </div>
 
-        {/* Dish Information */}
-        <div className="flex-1 min-w-0">
-          {/* Title and Category */}
-          <div className="flex items-start justify-between mb-2">
-            <div className="flex-1 min-w-0">
-              <h3 className="text-base font-semibold text-[#2D2A26] mb-1 line-clamp-2 leading-tight">
-                {dish.name}
-              </h3>
-              <div className="flex items-center space-x-2">
-                <span className="inline-flex items-center px-2 py-1 bg-[#F5F4F2] text-[#6B6B6B] text-xs rounded-full">
-                  {dish.category}
-                </span>
-                {dish.vegen_desc && (
-                  <span className="inline-flex items-center px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">
-                    素食
-                  </span>
-                )}
-              </div>
-            </div>
+        {error && (
+          <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-red-100 rounded-full shadow-md flex items-center justify-center border border-red-200">
+            <span className="text-red-500 text-xs">!</span>
           </div>
-
-          {/* Price and Rating */}
-          <div className="flex items-center justify-between mb-2">
-            {dish.price && (
-              <span className="text-lg font-bold text-[#FF6D28]">
-                {dish.price}
-              </span>
-            )}
-            <div className="flex items-center space-x-1">
-              <Star className="w-4 h-4 text-yellow-400 fill-current" />
-              <span className="text-sm text-[#6B6B6B]">4.5</span>
-            </div>
-          </div>
-
-          {/* Description */}
-          <p className="text-sm text-[#6B6B6B] line-clamp-2 leading-relaxed mb-2">
-            {dish.gen_desc || dish.desc || '暂无描述'}
-          </p>
-
-          {/* Additional Info */}
-          <div className="flex items-center space-x-4 text-xs text-[#6B6B6B]">
-            {dish.spice_level && (
-              <div className="flex items-center">
-                <span className="mr-1">🌶️</span>
-                <span>{dish.spice_level}/5</span>
-              </div>
-            )}
-            <div className="flex items-center">
-              <Clock className="w-3 h-3 mr-1" />
-              <span>5-10分钟</span>
-            </div>
-            <div className="flex items-center">
-              <MapPin className="w-3 h-3 mr-1" />
-              <span>热门</span>
-            </div>
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );
 }
+
+export default memo(MobileDishListItem);

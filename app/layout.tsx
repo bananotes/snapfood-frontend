@@ -1,15 +1,14 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import '@/styles/mobile.css';
 import { AppProvider } from '@/contexts/AppContext';
+import { I18nProvider } from '@/contexts/I18nContext';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 export const metadata: Metadata = {
   title: 'SnapDish - 智能菜单扫描',
   description: '拍照扫描菜单，AI智能分析菜品信息，为您推荐美食',
   generator: 'SnapDish',
-  viewport:
-    'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover',
-  themeColor: '#8B7355',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
@@ -20,6 +19,15 @@ export const metadata: Metadata = {
     email: false,
     address: false,
   },
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: 'cover',
+  themeColor: '#8B7355',
 };
 
 export default function RootLayout({
@@ -40,7 +48,14 @@ export default function RootLayout({
         <link rel="manifest" href="/manifest.json" />
       </head>
       <body className="antialiased">
-        <AppProvider>{children}</AppProvider>
+        <I18nProvider>
+          <AppProvider>
+            <div className="absolute top-4 right-4 z-50">
+              <LanguageSwitcher />
+            </div>
+            {children}
+          </AppProvider>
+        </I18nProvider>
       </body>
     </html>
   );

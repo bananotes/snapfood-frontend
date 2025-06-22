@@ -3,9 +3,10 @@
 import { useEffect, useState } from 'react';
 import { X, Heart, Share2 } from 'lucide-react';
 import type { Dish } from '@/contexts/AppContext';
-import Image from 'next/image';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import ImageCarousel from './ImageCarousel';
+import { useDishImage } from '@/hooks/useDishImage';
 
 interface DishDetailModalProps {
   dish: Dish | null;
@@ -19,6 +20,26 @@ export default function DishDetailModal({
   onClose,
 }: DishDetailModalProps) {
   const [isFavorite, setIsFavorite] = useState(false);
+
+  // 只有当弹窗打开且有菜品时才获取图片
+  const shouldSkip = !isOpen || !dish;
+
+  const { imageUrls, isLoading, error, refetch } = useDishImage(
+    {
+      name: dish?.name || '',
+      desc: dish?.desc || '',
+      gen_desc: dish?.gen_desc || '',
+      category: dish?.category || '',
+      count: 6,
+      place_id: dish?.id || '',
+    },
+    shouldSkip, // 使用skip参数
+  );
+
+  // 当菜品改变时，重置收藏状态
+  useEffect(() => {
+    setIsFavorite(false);
+  }, [dish?.id]);
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -59,25 +80,63 @@ export default function DishDetailModal({
 
         {/* Content */}
         <div className="p-6">
-          {/* 菜品图片 */}
-          <div className="relative bg-white mb-6">
-            <div className="aspect-[4/3] relative overflow-hidden rounded-lg">
-              <Image
-                src="/placeholder.jpg"
-                alt={dish.name}
-                fill
-                className="object-cover"
-                priority
-              />
-            </div>
+          {/* 菜品图片轮播 */}
+          <div className="mb-6">
+            {isLoading && (
+              <div className="aspect-[4/3] bg-gray-100 rounded-lg flex items-center justify-center">
+                <div className="flex flex-col items-center space-y-2">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                  <p className="text-sm text-gray-500">正在获取菜品图片...</p>
+                </div>
+              </div>
+            )}
 
-            {/* 图片提示 */}
-            <div className="bg-blue-50 border-l-4 border-blue-400 p-3 mt-3 rounded">
-              <p className="text-sm text-blue-800">
-                📸 <strong>菜品图片</strong> -
-                后端同学正在开发真实的菜品图片API，当前显示占位图片
-              </p>
-            </div>
+            {error && (
+              <div className="aspect-[4/3] bg-gray-100 rounded-lg flex items-center justify-center">
+                <div className="text-center">
+                  <div className="text-4xl mb-2">🖼️</div>
+                  <p className="text-sm text-gray-500 mb-2">图片加载失败</p>
+                  <p className="text-xs text-gray-400 mb-3">{error}</p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={refetch}
+                    className="text-xs">
+                    重试
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {!isLoading && !error && (
+              <ImageCarousel
+                images={imageUrls}
+                className="w-full"
+                showIndicators={true}
+                showControls={true}
+                autoPlay={false}
+                fallbackImage="/placeholder.jpg"
+              />
+            )}
+
+            {/* 图片状态提示 */}
+            {!isLoading && !error && imageUrls.length === 0 && (
+              <div className="bg-yellow-50 border-l-4 border-yellow-400 p-3 mt-3 rounded">
+                <p className="text-sm text-yellow-800">
+                  📸 <strong>暂无图片</strong> -
+                  未找到相关菜品图片，显示占位图片
+                </p>
+              </div>
+            )}
+
+            {!isLoading && !error && imageUrls.length > 0 && (
+              <div className="bg-green-50 border-l-4 border-green-400 p-3 mt-3 rounded">
+                <p className="text-sm text-green-800">
+                  📸 <strong>菜品图片</strong> - 已获取 {imageUrls.length}{' '}
+                  张相关图片
+                </p>
+              </div>
+            )}
           </div>
 
           {/* 菜品基本信息 */}

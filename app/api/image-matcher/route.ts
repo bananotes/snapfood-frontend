@@ -69,7 +69,15 @@ export async function GET(req: NextRequest) {
       req.headers.get('x-forwarded-for') ||
       req.headers.get('x-real-ip') ||
       'unknown';
-    console.log(`Image matcher request from IP: ${clientIP}`);
+
+    // 为缩略图请求添加专门的日志
+    if (count === '1') {
+      console.log(
+        `[Thumbnail Request] from IP: ${clientIP}, Dish Name: "${name}"`,
+      );
+    } else {
+      console.log(`Image matcher request from IP: ${clientIP}`);
+    }
 
     // Execute workflow with validated dish information
     const workflowPayload = {

@@ -10,12 +10,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { useTranslation } from '@/contexts/I18nContext';
+import LanguageSwitcher from '../LanguageSwitcher';
 
 interface Restaurant {
   id?: string;
   displayName?: {
-    text?: string;
-    languageCode?: string;
+    text: string;
+    languageCode: string;
   };
   address?: string;
   distance?: number;
@@ -24,6 +26,9 @@ interface Restaurant {
   cuisine?: string;
   phone?: string;
   website?: string;
+  userRatingCount?: number;
+  priceLevel?: string;
+  types?: string[];
 }
 
 interface MobileRestaurantSelectionProps {
@@ -41,6 +46,7 @@ export default function MobileRestaurantSelection({
   const [searchQuery, setSearchQuery] = useState('');
   const [isManualInputOpen, setIsManualInputOpen] = useState(false);
   const [manualRestaurantName, setManualRestaurantName] = useState('');
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (difyResponse?.data?.outputs?.restaurants) {
@@ -50,9 +56,16 @@ export default function MobileRestaurantSelection({
 
   const filteredRestaurants = restaurants.filter(restaurant =>
     restaurant.displayName?.text
-      ?.toLowerCase()
+      .toLowerCase()
       .includes(searchQuery.toLowerCase()),
   );
+
+  const handleRestaurantSelect = (restaurant: Restaurant) => {
+    onSelect({
+      id: restaurant.id || 'unknown',
+      name: restaurant.displayName?.text || t('restaurant.selectRestaurant'),
+    });
+  };
 
   const handleManualSubmit = () => {
     if (manualRestaurantName.trim()) {
@@ -65,20 +78,20 @@ export default function MobileRestaurantSelection({
     }
   };
 
-  const handleRestaurantSelect = (restaurant: Restaurant) => {
-    onSelect({
-      id: restaurant.id || 'unknown',
-      name: restaurant.displayName?.text || 'Unknown Restaurant',
-    });
-  };
-
   return (
     <div className="min-h-screen bg-[#FAFAF9] pb-safe-bottom">
       {/* Header Section */}
       <div className="bg-white border-b border-[#E8E6E3] px-4 py-4">
-        <h1 className="text-xl font-bold text-[#2D2A26] mb-2">选择餐厅</h1>
+        {/* Language Switcher */}
+        <div className="absolute top-4 right-4 z-50">
+          <LanguageSwitcher variant="compact" />
+        </div>
+
+        <h1 className="text-xl font-bold text-[#2D2A26] mb-2">
+          {t('restaurant.title')}
+        </h1>
         <p className="text-sm text-[#6B6B6B] mb-4">
-          我们找到了以下匹配的餐厅，请选择正确的餐厅
+          {t('restaurant.subtitle')}
         </p>
 
         {/* Search Bar */}
@@ -86,7 +99,7 @@ export default function MobileRestaurantSelection({
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-[#6B6B6B]" />
           <Input
             type="text"
-            placeholder="搜索餐厅..."
+            placeholder={t('restaurant.searchPlaceholder')}
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             className="pl-10 pr-4 py-3 bg-[#F5F4F2] border-0 rounded-2xl text-[#2D2A26] placeholder-[#6B6B6B]"
@@ -99,70 +112,62 @@ export default function MobileRestaurantSelection({
           variant="outline"
           className="w-full py-3 border-2 border-[#E8E6E3] rounded-2xl text-[#2D2A26] hover:bg-[#F5F4F2] transition-colors touch-manipulation">
           <Plus className="w-4 h-4 mr-2" />
-          手动输入餐厅名称
+          {t('restaurant.manualInputButton')}
         </Button>
       </div>
 
       {/* Restaurant List */}
       <div className="px-4 py-4">
         {filteredRestaurants.length > 0 ? (
-          <div className="space-y-3">
+          <div className="space-y-4">
             {filteredRestaurants.map((restaurant, index) => (
               <div
                 key={restaurant.id || index}
-                onClick={() => handleRestaurantSelect(restaurant)}
-                className="bg-white rounded-2xl p-4 shadow-sm border border-[#E8E6E3] active:bg-[#FAFAF9] transition-colors touch-manipulation">
+                className="bg-white rounded-2xl p-4 shadow-sm border border-[#E8E6E3]">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex-1">
                     <h3 className="text-lg font-semibold text-[#2D2A26] mb-1">
-                      {restaurant.displayName?.text || '未知餐厅'}
+                      {restaurant.displayName?.text ||
+                        t('restaurant.selectRestaurant')}
                     </h3>
                     {restaurant.address && (
                       <div className="flex items-center text-sm text-[#6B6B6B] mb-2">
                         <MapPin className="w-4 h-4 mr-1" />
-                        <span className="line-clamp-1">
-                          {restaurant.address}
-                        </span>
+                        <span>{restaurant.address}</span>
                       </div>
                     )}
+                    <div className="flex items-center space-x-4 text-sm text-[#6B6B6B]">
+                      {restaurant.rating && (
+                        <div className="flex items-center">
+                          <Star className="w-4 h-4 mr-1 text-yellow-500 fill-current" />
+                          <span>{restaurant.rating}</span>
+                          {restaurant.userRatingCount && (
+                            <span className="ml-1">
+                              ({restaurant.userRatingCount})
+                            </span>
+                          )}
+                        </div>
+                      )}
+                      {restaurant.priceLevel && (
+                        <span>{restaurant.priceLevel}</span>
+                      )}
+                    </div>
                   </div>
-
-                  {/* Match Score */}
                   {restaurant.matchScore && (
                     <div className="flex-shrink-0 ml-3">
                       <div className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full font-medium">
-                        {Math.round(restaurant.matchScore * 100)}% 匹配
+                        {Math.round(restaurant.matchScore * 100)}%{' '}
+                        {t('common.match')}
                       </div>
                     </div>
                   )}
                 </div>
 
-                {/* Restaurant Details */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4 text-sm text-[#6B6B6B]">
-                    {restaurant.rating && (
-                      <div className="flex items-center">
-                        <Star className="w-4 h-4 text-yellow-400 fill-current mr-1" />
-                        <span>{restaurant.rating}</span>
-                      </div>
-                    )}
-                    {restaurant.distance && (
-                      <div className="flex items-center">
-                        <MapPin className="w-4 h-4 mr-1" />
-                        <span>{restaurant.distance}m</span>
-                      </div>
-                    )}
-                    {restaurant.cuisine && (
-                      <span className="bg-[#F5F4F2] px-2 py-1 rounded-full text-xs">
-                        {restaurant.cuisine}
-                      </span>
-                    )}
-                  </div>
-
+                <div className="flex justify-end">
                   <Button
                     size="sm"
                     className="bg-[#8B7355] hover:bg-[#7a654c] text-white px-4 py-2 rounded-xl text-sm font-medium touch-manipulation">
-                    选择
+                    {t('restaurant.selectRestaurant')}
                   </Button>
                 </div>
               </div>
@@ -174,17 +179,15 @@ export default function MobileRestaurantSelection({
               <Search className="w-8 h-8 text-[#6B6B6B]" />
             </div>
             <h3 className="text-lg font-semibold text-[#2D2A26] mb-2">
-              {searchQuery ? '未找到匹配的餐厅' : '暂无餐厅数据'}
+              {searchQuery ? t('restaurant.noResults') : t('restaurant.noData')}
             </h3>
             <p className="text-sm text-[#6B6B6B] mb-4">
-              {searchQuery
-                ? '请尝试其他关键词或手动输入餐厅名称'
-                : '请检查OCR识别结果或手动输入餐厅名称'}
+              {searchQuery ? t('restaurant.noResults') : t('restaurant.noData')}
             </p>
             <Button
               onClick={() => setIsManualInputOpen(true)}
               className="bg-[#8B7355] hover:bg-[#7a654c] text-white px-6 py-3 rounded-2xl font-medium touch-manipulation">
-              手动输入餐厅名称
+              {t('restaurant.manualInputButton')}
             </Button>
           </div>
         )}
@@ -195,37 +198,28 @@ export default function MobileRestaurantSelection({
         <DialogContent className="sm:max-w-md mx-4 rounded-2xl">
           <DialogHeader>
             <DialogTitle className="text-lg font-semibold text-[#2D2A26]">
-              手动输入餐厅名称
+              {t('restaurant.manualInputTitle')}
             </DialogTitle>
           </DialogHeader>
-
           <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-[#2D2A26] mb-2">
-                餐厅名称
-              </label>
-              <Input
-                type="text"
-                placeholder="请输入餐厅名称..."
-                value={manualRestaurantName}
-                onChange={e => setManualRestaurantName(e.target.value)}
-                className="w-full py-3 px-4 border-2 border-[#E8E6E3] rounded-2xl text-[#2D2A26] placeholder-[#6B6B6B] focus:border-[#8B7355] focus:ring-0"
-                onKeyPress={e => e.key === 'Enter' && handleManualSubmit()}
-              />
-            </div>
-
+            <Input
+              type="text"
+              placeholder={t('restaurant.manualInputPlaceholder')}
+              value={manualRestaurantName}
+              onChange={e => setManualRestaurantName(e.target.value)}
+              className="w-full"
+            />
             <div className="flex space-x-3">
               <Button
-                onClick={() => setIsManualInputOpen(false)}
                 variant="outline"
-                className="flex-1 py-3 border-2 border-[#E8E6E3] rounded-2xl text-[#2D2A26] hover:bg-[#F5F4F2] transition-colors touch-manipulation">
-                取消
+                onClick={() => setIsManualInputOpen(false)}
+                className="flex-1">
+                {t('common.cancel')}
               </Button>
               <Button
                 onClick={handleManualSubmit}
-                disabled={!manualRestaurantName.trim()}
-                className="flex-1 py-3 bg-[#8B7355] hover:bg-[#7a654c] text-white rounded-2xl font-medium touch-manipulation disabled:opacity-50 disabled:cursor-not-allowed">
-                确认
+                className="flex-1 bg-[#8B7355] hover:bg-[#7a654c] text-white">
+                {t('common.confirm')}
               </Button>
             </div>
           </div>

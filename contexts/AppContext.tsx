@@ -1,6 +1,12 @@
 'use client';
 
-import { createContext, useContext, useReducer, type ReactNode } from 'react';
+import {
+  createContext,
+  useContext,
+  useReducer,
+  type ReactNode,
+  useCallback,
+} from 'react';
 
 // Add 'onboarding' to AppState
 export type AppState =
@@ -43,21 +49,32 @@ interface AppContextType {
   setCategories: (categories: Category[]) => void;
   setActiveCategory: (category: string) => void;
   setProgress: (progress: number) => void;
-  setError: (error: string) => void;
+  setError: (error: string | null) => void;
   clearError: () => void;
   toggleSearch: () => void;
   closeSearch: () => void;
+  getDishById: (id: string) => Dish | undefined;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
+// 自定义Hook，用于方便地使用上下文
+export const useAppContext = () => {
+  const context = useContext(AppContext);
+  if (!context) {
+    throw new Error('useAppContext必须在AppProvider内部使用');
+  }
+  return context;
+};
+
+// 为useReducer定义Action类型
 type Action =
   | { type: 'SET_STATE'; payload: AppState }
   | { type: 'SET_DISHES'; payload: Dish[] }
   | { type: 'SET_CATEGORIES'; payload: Category[] }
   | { type: 'SET_ACTIVE_CATEGORY'; payload: string }
   | { type: 'SET_PROGRESS'; payload: number }
-  | { type: 'SET_ERROR'; payload: string }
+  | { type: 'SET_ERROR'; payload: string | null }
   | { type: 'CLEAR_ERROR' }
   | { type: 'TOGGLE_SEARCH' }
   | { type: 'CLOSE_SEARCH' };
@@ -74,7 +91,7 @@ interface State {
 
 // Set initial state to 'onboarding'
 const initialState: State = {
-  state: 'onboarding', // Changed from "idle"
+  state: 'onboarding',
   dishes: [],
   categories: [],
   activeCategory: '推荐',
@@ -83,7 +100,8 @@ const initialState: State = {
   isSearchActive: false,
 };
 
-function appReducer(state: State, action: Action): State {
+// Reducer函数
+const appReducer = (state: State, action: Action): State => {
   switch (action.type) {
     case 'SET_STATE':
       // When clearing error, if current state is error, go to onboarding, else idle
@@ -96,7 +114,7 @@ function appReducer(state: State, action: Action): State {
       }
       return { ...state, state: action.payload };
     case 'SET_DISHES':
-      return { ...state, dishes: action.payload };
+      return { ...state, dishes: action.payload, state: 'show_cards' };
     case 'SET_CATEGORIES':
       return { ...state, categories: action.payload };
     case 'SET_ACTIVE_CATEGORY':
@@ -129,39 +147,64 @@ function appReducer(state: State, action: Action): State {
     default:
       return state;
   }
-}
+};
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(appReducer, initialState);
 
+  // 使用useCallback包装所有dispatch函数，以稳定其引用
+  const setDishes = useCallback(
+    (dishes: Dish[]) => dispatch({ type: 'SET_DISHES', payload: dishes }),
+    [],
+  );
+  const setCategories = useCallback(
+    (categories: Category[]) =>
+      dispatch({ type: 'SET_CATEGORIES', payload: categories }),
+    [],
+  );
+  const setActiveCategory = useCallback(
+    (category: string) =>
+      dispatch({ type: 'SET_ACTIVE_CATEGORY', payload: category }),
+    [],
+  );
+  const setState = useCallback(
+    (newState: AppState) => dispatch({ type: 'SET_STATE', payload: newState }),
+    [],
+  );
+  const setProgress = useCallback(
+    (progress: number) => dispatch({ type: 'SET_PROGRESS', payload: progress }),
+    [],
+  );
+  const setError = useCallback(
+    (error: string | null) => dispatch({ type: 'SET_ERROR', payload: error }),
+    [],
+  );
+  const clearError = useCallback(() => dispatch({ type: 'CLEAR_ERROR' }), []);
+  const toggleSearch = useCallback(
+    () => dispatch({ type: 'TOGGLE_SEARCH' }),
+    [],
+  );
+  const closeSearch = useCallback(() => dispatch({ type: 'CLOSE_SEARCH' }), []);
+  const getDishById = useCallback(
+    (id: string) => state.dishes.find(dish => dish.id === id),
+    [state.dishes],
+  );
+
   const contextValue: AppContextType = {
     ...state,
-    setState: (newState: AppState) =>
-      dispatch({ type: 'SET_STATE', payload: newState }),
-    setDishes: (dishes: Dish[]) =>
-      dispatch({ type: 'SET_DISHES', payload: dishes }),
-    setCategories: (categories: Category[]) =>
-      dispatch({ type: 'SET_CATEGORIES', payload: categories }),
-    setActiveCategory: (category: string) =>
-      dispatch({ type: 'SET_ACTIVE_CATEGORY', payload: category }),
-    setProgress: (progress: number) =>
-      dispatch({ type: 'SET_PROGRESS', payload: progress }),
-    setError: (error: string) =>
-      dispatch({ type: 'SET_ERROR', payload: error }),
-    clearError: () => dispatch({ type: 'CLEAR_ERROR' }),
-    toggleSearch: () => dispatch({ type: 'TOGGLE_SEARCH' }),
-    closeSearch: () => dispatch({ type: 'CLOSE_SEARCH' }),
+    setDishes,
+    setCategories,
+    setActiveCategory,
+    setState,
+    setProgress,
+    setError,
+    clearError,
+    toggleSearch,
+    closeSearch,
+    getDishById,
   };
 
   return (
     <AppContext.Provider value={contextValue}>{children}</AppContext.Provider>
   );
-}
-
-export function useAppContext() {
-  const context = useContext(AppContext);
-  if (context === undefined) {
-    throw new Error('useAppContext must be used within an AppProvider');
-  }
-  return context;
 }
